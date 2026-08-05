@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio — Fixed Income &amp; Credit</title>
+  <meta name="description" content="Senior investment professional specialising in fixed income, credit research, ESG integration, and risk governance." />
+  <!-- base tag: anchors all relative URLs (fetch, images, links) to the
+       directory containing index.html — works correctly whether hosted at
+       the root (username.github.io) or a subpath (username.github.io/repo) -->
+  <base href="./" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- file:// protocol warning — hidden by default, shown by JS when the page
+     is opened by double-clicking rather than served over HTTP.
+     fetch() is blocked by browsers on file://, so data won't load. -->
+<div id="file-protocol-warning" style="display:none; position:fixed; inset:0; z-index:9999;
+     background:rgba(20,32,46,0.97); color:#f0f4f8; font-family:system-ui,sans-serif;
+     align-items:center; justify-content:center; flex-direction:column; gap:1rem; padding:2rem; text-align:center;">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C9A227" stroke-width="1.5">
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <strong style="font-size:1.1rem;">Cannot load data over file://</strong>
+  <p style="max-width:420px; line-height:1.7; color:#9ab; font-size:0.9rem;">
+    Browsers block file access for security when you open HTML directly.<br>
+    Serve the folder over HTTP instead — it only takes one command:
+  </p>
+  <code style="background:#0d1b26; padding:0.6rem 1.2rem; border-radius:6px; font-size:0.9rem; color:#7ecfcf;">
+    npx serve .
+  </code>
+  <p style="font-size:0.8rem; color:#667; margin-top:0.5rem;">
+    Then open <strong style="color:#9ab;">http://localhost:3000</strong> in your browser.
+  </p>
+</div>
+
+<div id="progress-bar"></div>
+<div class="tooltip-box" id="scatter-tooltip"></div>
+
+<!-- ══════════════════════════════════════════════
+     NAV
+     Avatar lives in a dedicated zero-width slot so it
+     never pushes the nav links or icons sideways.
+══════════════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-inner">
+
+    <div class="nav-avatar-slot" id="nav-avatar-slot">
+      <img id="nav-avatar-img" class="nav-avatar" src="" alt="Profile" style="display:none;" />
+      <div id="nav-avatar-initials" class="nav-avatar-placeholder" style="display:none;">YN</div>
+    </div>
+
+    <div class="nav-logo">
+      <span id="nav-logo-name">Your</span><span id="nav-logo-surname"> Name</span>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#edge">Edge</a></li>
+      <li><a href="#achievements">Achievements</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#credentials">Credentials</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-actions">
+      <a href="#" data-linkedin class="nav-icon-btn" aria-label="LinkedIn" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+      </a>
+      <a href="#" data-email class="nav-icon-btn" aria-label="Email">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </a>
+      <a href="#" data-cv class="nav-cv-btn" download aria-label="Download CV">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        CV
+      </a>
+
+      <!-- Theme switcher: lets you preview palettes live -->
+      <div class="theme-switch" aria-label="Theme picker">
+        <button class="theme-dot" data-theme-pick="steel"  title="Steel (default)"></button>
+        <button class="theme-dot" data-theme-pick="slate"  title="Slate"></button>
+        <button class="theme-dot" data-theme-pick="arctic" title="Arctic"></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     HERO — banner background + transparent-PNG photo
+══════════════════════════════════════════════ -->
+<section id="hero">
+  <div id="hero-bg-photo" aria-hidden="true"></div>
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-mono">Fixed Income · Credit · Asset Owner</div>
+      <h1 class="hero-name" id="hero-name"><strong>Your Name</strong></h1>
+      <div class="hero-title" id="hero-title">Fixed Income &amp; Credit Specialist · Asset Owner | ESG Integration | Risk Governance</div>
+      <p class="hero-tagline" id="hero-tagline">Institutional-grade thinking. Quantifiable outcomes. Built for the next chapter.</p>
+
+      <!-- Inline proof strip: editorial stat row, sits in text flow -->
+      <div class="hero-proof-strip" id="hero-proof-strip">
+        <!-- populated by JS from stats.csv -->
+      </div>
+
+      <div class="hero-actions">
+        <a href="#" data-linkedin class="btn-primary" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          Connect on LinkedIn
+        </a>
+        <a href="#" data-email class="btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          Send an Email
+        </a>
+        <a href="#" data-cv class="btn-secondary" download>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download CV
+        </a>
+      </div>
+    </div>
+
+    <!-- Photo: use a PNG (or WebP) with a transparent background.
+         It sits directly on the animated banner — no card, no mask needed,
+         because transparency is baked into the source image. -->
+    <div class="hero-photo-wrap">
+      <img id="hero-photo-img" class="hero-photo-img" src="images/profile.png" alt="Profile photo"
+        onerror="this.style.display='none'; document.getElementById('hero-photo-placeholder').style.display='flex';" />
+      <div id="hero-photo-placeholder" class="hero-photo-placeholder" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span style="font-size:0.75rem;color:var(--text-muted);text-align:center;">
+          Add a transparent PNG at<br>
+          <code style="font-size:0.68rem;color:var(--accent)">images/profile.png</code>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievement spotlight: rotates through key achievements at hero base -->
+  <div class="hero-spotlight-wrap" id="hero-spotlight-wrap">
+    <div class="hero-spotlight-inner" id="hero-spotlight-inner">
+      <!-- populated by JS from achievements.csv -->
+    </div>
+  </div>
+
+  <div class="hero-scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-mouse"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     1. EDGE  (most important — leads the story)
+══════════════════════════════════════════════ -->
+<section id="edge" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">What Sets Me Apart</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">The Professional Edge</h2>
+    <p class="section-subtitle">Seven years at the intersection of fundamental research, institutional risk governance, and ESG discipline — with a track record of translating complexity into frameworks that last.</p>
+
+    <div class="carousel-wrap reveal" id="edge-carousel">
+      <div class="carousel-track-outer">
+        <div class="carousel-track" id="edge-track"></div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-arrow carousel-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-arrow carousel-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     2. ACHIEVEMENTS
+══════════════════════════════════════════════ -->
+<section id="achievements" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Key Achievements</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">Initiatives That Moved the Needle</h2>
+    <p class="section-subtitle">Selected examples where analysis translated into institutional action — at scale, with governance, and with lasting impact.</p>
+
+    <div class="carousel-wrap reveal" id="ach-carousel">
+      <div class="carousel-track-outer">
+        <div class="carousel-track" id="ach-track"></div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-arrow carousel-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-arrow carousel-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     3. EXPERIENCE & EDUCATION
+══════════════════════════════════════════════ -->
+<section id="experience" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Background</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">Experience &amp; Education</h2>
+    <p class="section-subtitle">A career built through each layer of the capital markets stack — from sell-side research, through multi-asset management, to the asset owner seat.</p>
+
+    <nav class="exp-tabs-nav" role="tablist">
+      <button class="exp-tab-btn active" role="tab" data-tab="corporate">Professional Experience</button>
+      <button class="exp-tab-btn"        role="tab" data-tab="academic">Academic Background</button>
+      <button class="exp-tab-btn"        role="tab" data-tab="continuous">Professional Development</button>
+    </nav>
+
+    <div class="exp-tab-panel active" id="tab-corporate" role="tabpanel"></div>
+    <div class="exp-tab-panel"        id="tab-academic"  role="tabpanel"></div>
+    <div class="exp-tab-panel"        id="tab-continuous" role="tabpanel"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     4. CREDENTIALS
+══════════════════════════════════════════════ -->
+<section id="credentials" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Professional Designations</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">Credentials</h2>
+    <p class="section-subtitle">Three globally recognised designations spanning investment analysis, alternative investments, and risk management.</p>
+
+    <div class="carousel-wrap reveal" id="cred-carousel">
+      <div class="carousel-track-outer">
+        <div class="carousel-track" id="cred-track"></div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-arrow carousel-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-arrow carousel-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     5. RESEARCH SAMPLES
+     To hide this whole section: set show_research to
+     "false" in data/profile.csv — no code edits needed.
+══════════════════════════════════════════════ -->
+<section id="research" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Analytical Perspective</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">Research Samples</h2>
+    <p class="section-subtitle">Illustrative analytical work across fixed income, credit, and ESG — demonstrating the research approach and data-driven investment framework.</p>
+
+    <div class="carousel-controls" id="research-nav-controls" style="justify-content:flex-start; margin-bottom:1.5rem;">
+      <button class="carousel-arrow" id="research-prev" aria-label="Previous research">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="research-nav-label" id="research-nav-label">1 / 1</span>
+      <button class="carousel-arrow" id="research-next" aria-label="Next research">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div id="research-card-wrap" class="research-card-outer reveal" style="opacity:0;transform:translateY(8px);">
+      <div class="research-header">
+        <h3 id="research-title">Loading…</h3>
+        <p id="research-subtitle"></p>
+      </div>
+      <div class="research-body" id="research-body">
+        <!-- populated per-sample by JS: chart OR photo panel + findings panel -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     6. GALLERY — Credibility & personality
+══════════════════════════════════════════════ -->
+<section id="gallery" class="section">
+  <div class="section-inner">
+    <div class="section-eyebrow">Beyond the Resume</div>
+    <div class="accent-rule"></div>
+    <h2 class="section-title">In the Field</h2>
+    <p class="section-subtitle">A glimpse behind the credentials — speaking engagements, team collaboration, and the moments that show how the work gets done.</p>
+
+    <div class="carousel-wrap reveal" id="gallery-carousel">
+      <div class="carousel-track-outer">
+        <div class="carousel-track" id="gallery-track"></div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-arrow carousel-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-arrow carousel-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p style="margin-top:1.5rem; font-size:0.8rem; color:var(--text-muted); font-style:italic;">
+      ↑ Edit captions and filenames in <code style="color:var(--accent); font-style:normal">data/gallery.csv</code>.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CONTACT  (v1-style dark closing band)
+══════════════════════════════════════════════ -->
+<section id="contact">
+  <div class="contact-inner">
+    <h2>Let's <strong>Connect</strong></h2>
+    <p>Open to senior fixed income, credit, or multi-asset roles at asset owners, sovereign funds, insurers, and institutional managers. Happy to talk.</p>
+    <div class="contact-links">
+      <a href="#" data-email class="contact-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Email Me
+      </a>
+      <a href="#" data-linkedin class="contact-link" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        LinkedIn
+      </a>
+      <a href="#" data-cv class="contact-link" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Download CV
+      </a>
+    </div>
+    <div class="footer-meta">Fixed Income · Credit · ESG · Asset Owner · Hong Kong</div>
+  </div>
+</section>
+
+<script src="js/main.js"></script>
+</body>
+</html>
