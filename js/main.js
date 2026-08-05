@@ -46,7 +46,7 @@ function parseCSV(text) {
 //
 // ─────────────────────────────────────────────────────────
 
-const DATA_BASE_URL = null; // ← change to your raw GitHub URL for two-repo mode
+const DATA_BASE_URL = 'https://raw.githubusercontent.com/kerensa-wong/portfolio-site/main/'; // ← change to your raw GitHub URL for two-repo mode
 
 // ── URL RESOLUTION ───────────────────────────────────────
 // Builds the correct absolute URL for a data/ or images/ path in both modes.
