@@ -1,0 +1,18 @@
+key,value
+name,Angel Nameko
+name_suffix,
+title_line1,Data Analyst
+title_line2,Make Better Decision and Implementation
+tagline,Harnessing in-depth data analytics with banking experience
+bio,"A credit and fixed income professional with 7+ years building investment frameworks at the intersection of fundamental research, risk discipline, and sustainability. Currently at an asset owner focused on turning complexity into conviction."
+email,yourname@email.com
+linkedin,https://linkedin.com/in/
+cv_file,data/cv_nameko.pdf
+location,Hong Kong
+photo,images/profile.png
+photo_thumb,images/profile_thumb.png
+theme,slate
+show_research,TRUE
+show_hero_stats,TRUE
+hero_bg_photo,images/banner.jpg
+hero_animation,leaves
