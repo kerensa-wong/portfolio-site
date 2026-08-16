@@ -27,41 +27,27 @@ function parseCSV(text) {
   });
 }
 
-// ── DATA SOURCE CONFIGURATION ────────────────────────────
+// ── DATA LOADING ─────────────────────────────────────────
 //
-// This single constant controls where data/ and images/ are fetched from.
-// Two modes:
+// Two modes — selected automatically at runtime:
 //
-//  MODE 1 — SAME ORIGIN (default, works for local dev and single-repo deploys)
-//    Leave DATA_BASE_URL as null. All paths resolve relative to index.html.
-//    Works with: npx serve .  |  single public GitHub Pages repo
+//  BUNDLED MODE (production — GitHub Pages)
+//    data-bundle.js is loaded before this script. It sets
+//    window.__PORTFOLIO_DATA__ with all CSVs pre-parsed, all JSONs
+//    pre-parsed, and all images/PDFs as base64 data URIs.
+//    No fetch() calls are made; no raw files exist in the public repo.
 //
-//  MODE 2 — SEPARATE DATA REPO (two-repo setup for private data)
-//    Set DATA_BASE_URL to the raw base URL of your public portfolio-site repo
-//    AFTER the GitHub Actions sync has run (data/ and images/ live there).
-//    Example:
-//      const DATA_BASE_URL = 'https://raw.githubusercontent.com/yourname/portfolio-site/main/';
-//    The data files are served from the public repo; the CSVs/images themselves
-//    are authored privately and pushed there automatically by GitHub Actions.
+//  FETCH MODE (local development)
+//    data-bundle.js is absent. Every load call uses fetch() against
+//    the local dev server (npx serve .). Raw data/ and images/ folders
+//    must be present next to index.html (symlink or copy from
+//    portfolio-data — see README).
+//    Switch to this mode by simply not building the bundle.
 //
-// ─────────────────────────────────────────────────────────
+// You never need to change this file to switch modes — it detects
+// automatically which mode it's in.
 
-const DATA_BASE_URL = 'https://raw.githubusercontent.com/kerensa-wong/portfolio-site/main/'; // ← change to your raw GitHub URL for two-repo mode
-
-// ── URL RESOLUTION ───────────────────────────────────────
-// Builds the correct absolute URL for a data/ or images/ path in both modes.
-// In same-origin mode: anchors to document.baseURI so subpath repos
-// (username.github.io/repo/) work without any extra config.
-// In two-repo mode: resolves against DATA_BASE_URL instead.
-
-function resolveUrl(path) {
-  if (DATA_BASE_URL) {
-    // Strip any leading ./ so paths like './data/profile.csv' join cleanly
-    const clean = path.replace(/^\.\//, '');
-    return DATA_BASE_URL.replace(/\/?$/, '/') + clean;
-  }
-  return new URL(path, document.baseURI).href;
-}
+const _BUNDLE = window.__PORTFOLIO_DATA__ || null;
 
 // Detect file:// and surface a human-readable error once.
 if (window.location.protocol === 'file:') {
@@ -71,19 +57,26 @@ if (window.location.protocol === 'file:') {
   });
 }
 
+/** Returns the data URI for an asset path from the bundle, or the raw
+ *  path itself in fetch mode (so src= and href= work normally). */
+function resolveAsset(path) {
+  if (_BUNDLE && _BUNDLE.assets[path]) return _BUNDLE.assets[path];
+  return path; // fetch mode: raw relative path works against local server
+}
+
 async function loadCSV(path) {
+  if (_BUNDLE) return _BUNDLE.csvs[path] || [];
   try {
-    let text = await (await fetch(resolveUrl(path))).text();
-    // Excel's "CSV UTF-8" save option prepends a byte-order-mark, which
-    // otherwise corrupts the very first header name (e.g. "id" becomes
-    // "\uFEFFid") and silently breaks every lookup against that column.
+    let text = await (await fetch(new URL(path, document.baseURI).href)).text();
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
     return parseCSV(text);
   }
   catch { return []; }
 }
+
 async function loadJSON(path) {
-  try { return await (await fetch(resolveUrl(path))).json(); }
+  if (_BUNDLE) return _BUNDLE.jsons[path] || null;
+  try { return await (await fetch(new URL(path, document.baseURI).href)).json(); }
   catch { return null; }
 }
 function safeText(str) {
@@ -794,11 +787,11 @@ async function showResearch(idx) {
   if (type === 'photo') {
     // For photo-type samples, chart_data_file is a direct image path
     // (e.g. images/research/research.jpg) — separate from the gallery,
-    // no JSON indirection needed.
     const imgPath = item.chart_data_file || 'images/research/research.jpg';
+    const imgSrc  = resolveAsset(imgPath);
     body.innerHTML = `
       <div class="research-photo-panel">
-        <img src="${safeText(imgPath)}" alt="${safeText(item.title)}"
+        <img src="${safeText(imgSrc)}" alt="${safeText(item.title)}"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='none'; this.parentElement.querySelector('.research-photo-placeholder').style.display='flex';">
         <div class="research-photo-caption">${safeText(item.source_note || '')}</div>
         <div class="research-photo-placeholder" style="display:none;">
@@ -812,12 +805,8 @@ async function showResearch(idx) {
       </div>
       <div class="research-findings-panel" id="research-findings-panel"></div>`;
   } else if (type === 'pdf') {
-    // chart_data_file is a direct path to a .pdf file. The browser's own
-    // PDF engine renders it inline via <iframe> — this supports full
-    // multi-page scrolling/zooming natively (unlike a single-page-image
-    // preview), and the expand button uses the Fullscreen API so the
-    // person can view a full slide deck without leaving the page.
     const pdfPath = item.chart_data_file || '';
+    const pdfSrc  = resolveAsset(pdfPath);
     body.innerHTML = `
       <div class="research-photo-panel">
         <div class="pdf-preview-wrap">
@@ -829,7 +818,7 @@ async function showResearch(idx) {
             <span>Inline preview unavailable in this browser.</span>
           </div>
         </div>
-        <a href="${safeText(pdfPath)}" target="_blank" rel="noopener" class="research-photo-caption pdf-open-link">
+        <a href="${safeText(pdfSrc)}" target="_blank" rel="noopener" class="research-photo-caption pdf-open-link">
           Open full PDF
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;display:inline;vertical-align:-1px;">
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
@@ -861,7 +850,7 @@ async function showResearch(idx) {
 
   if (type === 'pdf') {
     const pdfPath = item.chart_data_file || '';
-    initPdfViewer(pdfPath);
+    initPdfViewer(resolveAsset(pdfPath));
     attachChartTooltip(document.createElement('canvas'), {});
   } else if (type !== 'photo') {
     document.getElementById('research-source').textContent = item.source_note || '';
@@ -996,7 +985,7 @@ function renderExperience(items, type) {
     const logoColHtml = hasLogo
       ? `<div class="timeline-logo-col">
            <div class="timeline-logo">
-             <img src="${safeText(item.logo)}" alt="${safeText(item.organization)} logo"
+             <img src="${safeText(resolveAsset(item.logo))}" alt="${safeText(item.organization)} logo"
                   onerror="this.closest('.timeline-item').classList.add('no-logo');">
            </div>
          </div>`
@@ -1032,7 +1021,7 @@ function renderExperience(items, type) {
 function renderCredentials(items) {
   return items.map(item => {
     const logoImg = item.logo_file
-      ? `<img src="${safeText(item.logo_file)}" alt="${safeText(item.credential)} logo"
+      ? `<img src="${safeText(resolveAsset(item.logo_file))}" alt="${safeText(item.credential)} logo"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
          <span class="cred-logo-fallback" style="display:none">${safeText(item.credential)}</span>`
       : `<span class="cred-logo-fallback">${safeText(item.credential)}</span>`;
@@ -1056,7 +1045,7 @@ function renderGallery(items) {
     const icon = ICONS[item.placeholder_icon] || ICONS['monitor'];
     return `
       <div class="gallery-item">
-        <img src="${safeText(item.image)}" alt="${safeText(item.caption)}"
+        <img src="${safeText(resolveAsset(item.image))}" alt="${safeText(item.caption)}"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
         <div class="gallery-placeholder" style="display:none">
           ${icon}
@@ -1110,7 +1099,7 @@ function populateProfile(profile) {
 
   const thumbSrc = g('photo_thumb') || g('photo');
   if (avatarImg && thumbSrc) {
-    avatarImg.src = thumbSrc;
+    avatarImg.src = resolveAsset(thumbSrc);
     avatarImg.style.display = '';
     avatarImg.onload = () => { if (avatarInitials) avatarInitials.style.display = 'none'; };
     avatarImg.onerror = () => {
@@ -1123,11 +1112,11 @@ function populateProfile(profile) {
   }
 
   const photoImg = document.getElementById('hero-photo-img');
-  if (photoImg) photoImg.src = g('photo');
+  if (photoImg) photoImg.src = resolveAsset(g('photo'));
 
   document.querySelectorAll('[data-email]').forEach(el => { el.href = 'mailto:' + g('email'); });
   document.querySelectorAll('[data-linkedin]').forEach(el => { el.href = g('linkedin'); });
-  document.querySelectorAll('[data-cv]').forEach(el => { el.href = g('cv_file'); });
+  document.querySelectorAll('[data-cv]').forEach(el => { el.href = resolveAsset(g('cv_file')); });
 
   // Theme + section visibility from CSV
   initTheme(g('theme'));
@@ -1152,7 +1141,7 @@ function populateProfile(profile) {
 
   // Hero background photo (optional, falls back to the plain animated banner
   // if the file is missing) and animation style: particles | leaves | none
-  initHeroBgPhoto(g('hero_bg_photo'));
+  initHeroBgPhoto(resolveAsset(g('hero_bg_photo')));
   const heroCanvas = document.getElementById('hero-canvas');
   if (heroCanvas) initHeroCanvas(heroCanvas, g('hero_animation'));
 }
